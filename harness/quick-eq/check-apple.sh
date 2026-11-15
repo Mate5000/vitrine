@@ -10,10 +10,12 @@ OUT="$HERE/build/apple"
 mkdir -p "$OUT"
 SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
 for file in AudioDSP.cpp QuickEQAudio.cpp QuickEQSettings.mm; do
-    arc=()
-    [[ "$file" == *.mm ]] && arc=(-fobjc-arc)
+    # Bash 3.2 (macOS /bin/bash) treats an empty array as unset with nounset.
+    # Keep common flags in the array so the C++-only iterations are nonempty too.
+    compile_flags=(-Wall -Wextra -Werror -Wno-deprecated-declarations -I"$SRC")
+    [[ "$file" == *.mm ]] && compile_flags+=(-fobjc-arc)
     xcrun --sdk iphoneos clang++ -target arm64-apple-ios16.1 -isysroot "$SDK" -std=c++17 \
-        -Wall -Wextra -Werror -Wno-deprecated-declarations -I"$SRC" "${arc[@]}" \
+        "${compile_flags[@]}" \
         -c "$FX/$file" -o "$OUT/$file.o"
 done
 xcrun --sdk iphoneos clang -target arm64-apple-ios16.1 -isysroot "$SDK" -fobjc-arc -I"$SRC" \
