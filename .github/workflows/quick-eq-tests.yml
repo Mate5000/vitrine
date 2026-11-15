@@ -1,0 +1,45 @@
+name: Quick EQ checks
+
+on:
+  workflow_dispatch:
+  push:
+    paths: ['tweak/Makefile', 'tweak/Resources/SGQuickEQ.bundle/**', 'tweak/Sources/Shared/QuickEQ/**', 'tweak/Sources/Shared/AudioEffects/AudioEffects.x', 'tweak/Sources/Native/Player/QuickEQ.x', 'tweak/Sources/Redesigned/Player/PlayerFooter.x', 'tweak/Sources/Redesigned/Player/PlayerMenu.m', 'tweak/Sources/App/ModSettings.x', 'harness/quick-eq/**', 'scripts/verify-quick-eq.py', '.github/workflows/quick-eq-tests.yml']
+  pull_request:
+    paths: ['tweak/Makefile', 'tweak/Resources/SGQuickEQ.bundle/**', 'tweak/Sources/Shared/QuickEQ/**', 'tweak/Sources/Shared/AudioEffects/AudioEffects.x', 'tweak/Sources/Native/Player/QuickEQ.x', 'tweak/Sources/Redesigned/Player/PlayerFooter.x', 'tweak/Sources/Redesigned/Player/PlayerMenu.m', 'tweak/Sources/App/ModSettings.x', 'harness/quick-eq/**', 'scripts/verify-quick-eq.py', '.github/workflows/quick-eq-tests.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  dsp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: bash harness/quick-eq/check.sh
+      - name: Check DSP and adapter memory safety
+        run: bash harness/quick-eq/check.sh
+        env:
+          SANITIZE: address,undefined
+      - run: python3 harness/quick-eq/make-flags.py
+      - run: bash scripts/check-layers.sh
+      - run: python3 harness/quick-eq/packaging.py
+  apple:
+    runs-on: macos-latest
+    env:
+      THEOS: ${{ github.workspace }}/theos
+    steps:
+      - uses: actions/checkout@v5
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - uses: actions/checkout@v5
+        with:
+          repository: theos/theos
+          path: theos
+          submodules: recursive
+      - run: brew install ffmpeg
+      - run: bash harness/quick-eq/check-apple.sh
+      - name: Build existing lossless handoff harness
+        run: bash harness/lossless/handoff-build.sh
+      - name: Compile existing audio integration harness with Quick EQ
+        run: bash harness/audio-effects/build-sim.sh

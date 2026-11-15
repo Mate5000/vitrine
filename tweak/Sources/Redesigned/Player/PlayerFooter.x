@@ -1,4 +1,4 @@
-// Player redesign: the footer as the Music app's row of three glyphs, lyrics, devices and queue, spread
+// Player redesign: a row of four glyphs, lyrics, Quick EQ, devices and queue, spread
 // evenly across the player, and no share button.
 //
 // Spotify's footer is Connect with the device's name at the leading edge, share, and the queue at the
@@ -33,13 +33,14 @@
 #import "Redesigned/Kit/SGRKit.h"
 #import "Headers/SPTEncoreIconView.h"
 #import "Player.h"
+#import "Shared/QuickEQ/QuickEQ.h"
 #import <objc/message.h>
 
 static const CGFloat kLyricsGlyphSize = 20;
 // Filled and at full strength while the lyrics are up, the way the Music app marks the control that is on.
 static NSString *const kLyricsSymbol = @"quote.bubble", *const kLyricsSymbolOpen = @"quote.bubble.fill";
-// Where the three glyphs sit, as parts of the footer's width.
-static const CGFloat kLeading = 0.2, kMiddle = 0.5, kTrailing = 0.8;
+// Where the four glyphs sit, as parts of the footer's width (mirrored for RTL).
+static const CGFloat kLeading = 0.14, kMiddle = 0.62, kTrailing = 0.86, kEQPosition = 0.38;
 static const CGFloat kGlyphMaxWidth = 30;
 
 // Issue #54: Spotify ends its bottom stack 61pt above the screen's bottom (01.txt:127, 576.67 + 236 of
@@ -61,6 +62,21 @@ static NSString *const kConnectSymbol = @"airplayaudio", *const kQueueSymbol = @
 static char kEncoreKey;
 static char kConnectKey, kShareKey, kTrimmerKey, kSharedByKey, kQueueKey, kQueueIconKey, kLyricsGlyphKey, kReachKey, kRowKey;
 static __weak SGRGlyphButton *sg_lyricsGlyph;
+static char kQuickEQKey;
+
+static SGRGlyphButton *quickEQIn(UIView *host) {
+    SGRGlyphButton *button = objc_getAssociatedObject(host, &kQuickEQKey);
+    if (!button) {
+        button = [SGRGlyphButton buttonWithSymbol:@"slider.horizontal.3" pointSize:20 title:SGQuickEQLocalize(@"Audio EQ")];
+        button.accessibilityIdentifier = @"SGQuickEQ.player";
+        button.glyph.tintColor = SGRSecondary();
+        __weak UIView *source = host;
+        button.onTap = ^{ SGQuickEQPresentPanel(nil, source); };
+        objc_setAssociatedObject(host, &kQuickEQKey, button, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+    if (button.superview != host) [host addSubview:button];
+    return button;
+}
 
 // The view the footer's stack view arranges around `view`.
 static UIView *arrangedAround(UIView *view, UIView *host) {
@@ -472,11 +488,14 @@ void SGRPlayerLowerRow(UIView *row) {
     SGRGlyphButton *lyrics = SGRPlayerLyricsGlyphIn(host);
     lyrics.bounds = CGRectMake(0, 0, 44, 44);
     lyrics.center = CGPointMake(round(width * (rtl ? kTrailing : kLeading)), middleY);
+    SGRGlyphButton *equalizer = quickEQIn(host);
+    equalizer.bounds = CGRectMake(0, 0, 44, 44);
+    equalizer.center = CGPointMake(round(width * (rtl ? 1 - kEQPosition : kEQPosition)), middleY);
     SGRPlayerLyricsChanged();
 
     UIView *connect = SGRFindByIdentifier(host, @"Components.ConnectButtonOutputSwitcher", &kConnectKey);
     UIView *glyph = SGRPlayerConnectGlyphIn(host, connect);
-    CGFloat connectFrom = glyph ? SGRPlayerTranslateArranged(arrangedAround(connect, host), glyph, CGPointMake(CGRectGetMidX(glyph.bounds), CGRectGetMidY(glyph.bounds)), host, round(width * kMiddle)) : -1;
+    CGFloat connectFrom = glyph ? SGRPlayerTranslateArranged(arrangedAround(connect, host), glyph, CGPointMake(CGRectGetMidX(glyph.bounds), CGRectGetMidY(glyph.bounds)), host, round(width * (rtl ? 1 - kMiddle : kMiddle))) : -1;
 
     UIView *queue = SGRFindByIdentifier(host, @"QueueButtonNowPlaying", &kQueueKey);
     standInForQueue((SPTEncoreIconView *)SGRFindByIdentifier(queue, @"Encore.IconView", &kQueueIconKey));

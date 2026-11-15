@@ -230,6 +230,9 @@ if [ -n "${EXT_DIR:-}" ]; then
   "$ROOT/scripts/merge-appintents.py" "$OUT" "$APP_DIR" "$EXT_DIR/app/Metadata.appintents"
 fi
 
+echo "==> verifying Quick EQ code, load command and resources"
+python3 "$ROOT/scripts/verify-quick-eq.py" "$OUT"
+
 echo "==> done: $OUT"
 [ "$INSTALL" = 1 ] && exec "$ROOT/scripts/install.sh" "$OUT"
 exit 0

@@ -24,15 +24,19 @@ TWEAK_NAME := spotifyglass
 
 # Every source under Sources/, so a new feature needs no Makefile edit. Shared/Flags/SGFlagList.m
 # is generated from the IPA by scripts/extract-flags.py.
-spotifyglass_FILES := $(shell find Sources -name '*.m' -o -name '*.x' -o -name '*.swift' | sort)
-spotifyglass_CFLAGS := -fobjc-arc -ISources -DSG_VERSION=\"$(SG_VERSION)\"
+spotifyglass_FILES := $(shell find Sources -name '*.m' -o -name '*.mm' -o -name '*.cpp' -o -name '*.x' -o -name '*.swift' | sort)
+spotifyglass_CFLAGS := -ISources -DSG_VERSION=\"$(SG_VERSION)\"
+spotifyglass_OBJCFLAGS := -fobjc-arc
+# Theos forwards target-wide CCFLAGS to Swift's Objective-C importer too, which
+# rejects -std=c++17. Scope the language standard to the actual C++ files.
+$(foreach source,$(filter %.cpp %.mm,$(spotifyglass_FILES)),$(eval $(source)_CFLAGS += -std=c++17))
 # The phone driver (Diagnostics/Driver.m) goes only into builds that carry FLEX: scripts/pipeline.sh sets
 # SG_DRIVER=1 for those, and every other build (make release, the release workflow's .deb) leaves it out.
 SG_DRIVER ?= 0
 spotifyglass_CFLAGS += -DSG_DRIVER=$(SG_DRIVER)
 spotifyglass_FRAMEWORKS := UIKit QuartzCore UniformTypeIdentifiers MediaPlayer CoreImage AudioToolbox AVFoundation CoreHaptics Accelerate CoreMotion CoreML CoreText OSLog
 # zlib unpacks KuGou's KRC lyrics (Shared/LyricsSources/KuGou.m).
-spotifyglass_LIBRARIES := z
+spotifyglass_LIBRARIES := z c++
 # Runtime swizzling instead of Substrate so the dylib has no extra dependency inside the IPA.
 spotifyglass_LOGOS_DEFAULT_GENERATOR := internal
 
@@ -57,3 +61,7 @@ sg-audio:
 # A copy of tweak/ made without the scripts beside it builds unchecked.
 before-all::
 	@if [ -x ../scripts/check-layers.sh ]; then ../scripts/check-layers.sh Sources; fi
+
+after-stage::
+	@mkdir -p "$(THEOS_STAGING_DIR)/Library/Application Support"
+	@cp -R Resources/SGQuickEQ.bundle "$(THEOS_STAGING_DIR)/Library/Application Support/"

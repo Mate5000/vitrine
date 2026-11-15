@@ -12,6 +12,7 @@
 //
 // The item says under its name what is not as Spotify plays it, so the menu reads as a settings summary.
 #import "Core/SGCore.h"
+#import "Shared/QuickEQ/QuickEQ.h"
 #import "Redesigned/ContextMenu/ContextMenu.h"
 #import "Shared/Player/PlayerState.h"
 #import "Shared/Player/SpeedPitch.h"
@@ -215,6 +216,8 @@ static UIAction *lyricsSourceItem(void) {
 
 static NSArray<UIMenuElement *> *playerItems(void) {
     NSMutableArray<UIMenuElement *> *items = [NSMutableArray arrayWithObject:soundMenu()];
+    [items insertObject:[UIAction actionWithTitle:SGQuickEQLocalize(@"Audio EQ") image:symbol(@"slider.horizontal.3")
+        identifier:@"SGQuickEQ.playerMenu" handler:^(__unused UIAction *action) { SGQuickEQPresentPanel(nil, sg_moreButton); }] atIndex:0];
     if (SGPlayerMenuOffersAnimatedArtwork()) {
         // Buttons named for what they do, not checkmarks: the HIG's changeable label for a toggled item.
         NSArray<NSArray *> *backgrounds = @[

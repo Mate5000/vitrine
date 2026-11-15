@@ -1783,13 +1783,14 @@ static BOOL linesSeek(SGRKaraokeView *lyrics) {
     // at the bottom edge of each glyph as well as the middle.
     after(3, ^{
         CGFloat bottom = 0;
-        for (NSString *symbol in @[@"list.bullet", @"airpods.pro"]) {
+        for (NSString *symbol in @[@"list.bullet", @"airpods.pro", @"slider.horizontal.3"]) {
             __block UIView *found = nil;
             NSMutableArray *queue = [NSMutableArray arrayWithObject:self.window];
             while (queue.count && !found) {
                 UIView *v = queue.firstObject;
                 [queue removeObjectAtIndex:0];
                 if ([v isKindOfClass:UIImageView.class] && [((UIImageView *)v).image isEqual:[UIImage systemImageNamed:symbol]]) found = v;
+                if ([symbol isEqualToString:@"slider.horizontal.3"] && [v.accessibilityIdentifier isEqualToString:@"SGQuickEQ.player"]) found = v;
                 [queue addObjectsFromArray:v.subviews];
             }
             CGRect drawn = [found convertRect:found.bounds toView:self.window];

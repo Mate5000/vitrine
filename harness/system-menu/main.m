@@ -633,7 +633,7 @@ static NSArray<NSString *> *quickTitles(void) {
         // The simulator's first menu of a launch is slow (UIKit loading its menu classes); `timing` measures the rest.
         check(took >= 0 && took < 1, [NSString stringWithFormat:@"the menu is on screen %.0f ms after the tap", took * 1000]);
         check(self.front.userInteractionEnabled, @"the mod's ⋯ takes touches");
-        check(menuShowsAll(@[@"Speed, Pitch & Reverb", @"Show Animated Artwork", @"More"]), @"the player's own items and More are in it");
+        check(menuShowsAll(@[@"Audio EQ", @"Speed, Pitch & Reverb", @"Show Animated Artwork", @"More"]), @"Quick EQ, the player's own items and More are in it");
         check(menuShowsAll(quickTitles()), @"the quick row has Share, Add to Playlist and Add to Queue");
         check(!menuShowsAny(@[@"Go to album", @"Lyrics", @"Sleep timer"]), @"Spotify's other rows are not at the top level");
         // Spotify's sheet is asked for once the menu is up, into the mod's window, under the app's.

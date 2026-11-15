@@ -34,6 +34,8 @@
 #import "AudioEffectsApply.h"
 #import "AudioEffectsPresets.h"
 #import "SGDSPEngine.h"
+#import "Shared/QuickEQ/QuickEQ.h"
+#import "Shared/QuickEQ/QuickEQAudio.h"
 
 // A burst of changes to a setting is gathered this long before it applies.
 static const double kApplyAfter = 0.03;
@@ -215,6 +217,7 @@ static OSStatus rendered(void *refCon, AudioUnitRenderActionFlags *flags, const 
         // A new rate is being set up on the queue: until then the sound passes as it is.
         if (engine && SGDSPEngineSampleRate(engine) == loadDouble(&sg_rateBits)) processBuffer(engine, flags, frames, data);
     }
+    SGQuickEQProcess((AudioUnit)refCon, SGPlayerSourceEpoch(), flags, timestamp, frames, data);
     SGAudioOutputReader reader = atomic_load_explicit(&sg_reader, memory_order_acquire);
     if (reader) readOut(reader, *flags, frames, data);
     return noErr;
@@ -283,12 +286,14 @@ static BOOL readFormat(AudioUnit unit) {
 static void listenTo(AudioUnit unit) {
     if (!unit) return;
     AudioUnitRemoveRenderNotify(unit, rendered, unit);
+    SGQuickEQPrepare(unit);
     if (!readFormat(unit)) return;
     // The sound held from before the output stopped, or from another output, would play first; the stream
     // starts over instead.
     SGDSPEngine *engine = atomic_load(&sg_engine);
     if (engine) SGDSPEngineRestart(engine);
     OSStatus status = AudioUnitAddRenderNotify(unit, rendered, unit);
+    SGQuickEQRenderNotifyStatus(status);
     if (status != noErr) SGLog(@"dsp: the render notify could not be added (%d)", (int)status);
 }
 
@@ -620,6 +625,8 @@ static void followRoute(void) {
 }
 
 %ctor {
+    SGQuickEQInitializeSettings();
+    SGQuickEQInitializeAudio();
     // Posted on the audio session's thread: handed to main without waiting, so it cannot deadlock against main.
     [NSNotificationCenter.defaultCenter addObserverForName:AVAudioSessionRouteChangeNotification object:nil queue:nil
                                                 usingBlock:^(NSNotification *note) {
@@ -629,6 +636,7 @@ static void followRoute(void) {
         followRoute();
     });
     sg_reachable = SGPlayerWatchMusicOutput(listenTo);
+    SGQuickEQSetReachable(sg_reachable);
     if (!sg_reachable) {
         SGLog(@"dsp: Spotify's output cannot be reached, the effects cannot reach its sound");
         return;

@@ -45,6 +45,13 @@ jobs:
           curl -fsSL "${{ inputs.ipa_url }}" -o ipa/spotify.ipa
           case "$(file --mime-type -b ipa/spotify.ipa)" in application/zip|application/x-ios-app) ;; *) echo "::error::Not an IPA"; exit 1 ;; esac
 
+      - name: Check Quick EQ DSP and Apple SDK linkage
+        run: |
+          bash harness/quick-eq/check.sh
+          bash harness/quick-eq/check-apple.sh
+          python3 harness/quick-eq/make-flags.py
+          python3 harness/quick-eq/packaging.py
+
       - run: make release
 
       - uses: actions/upload-artifact@v5

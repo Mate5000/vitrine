@@ -17,12 +17,17 @@ mkdir -p "$OUT/gen" "$OUT/AudioEffectsHarness.app"
 "$THEOS/bin/logos.pl" -c generator=internal "$FX/AudioEffects.x" > "$OUT/gen/AudioEffects.m"
 "$THEOS/bin/logos.pl" -c generator=internal "$SRC/Shared/Player/SpeedPitch.x" > "$OUT/gen/SpeedPitch.m"
 SDK=$(xcrun --sdk iphonesimulator --show-sdk-path)
+EQ=$SRC/Shared/QuickEQ
+for source in "$EQ/AudioDSP.cpp" "$EQ/QuickEQAudio.cpp" ../quick-eq/mailbox.cpp; do
+    xcrun -sdk iphonesimulator clang++ -std=c++17 -target arm64-apple-ios17.0-simulator -g -O1 -isysroot "$SDK" \
+        -c "$source" -o "$OUT/$(basename "$source").o"
+done
 xcrun -sdk iphonesimulator clang -target arm64-apple-ios17.0-simulator -fobjc-arc -g -O1 -isysroot "$SDK" -Wno-deprecated-declarations \
     -I"$SRC" -I"$FX" -I"$SRC/Shared/Player" -isystem "$VENDOR/libbs2b" -isystem "$VENDOR/wdl/eel2" \
     sim/main.m ../scene.m "$OUT/gen/AudioEffects.m" "$OUT/gen/SpeedPitch.m" "$SRC/Shared/Player/SGTimePitch.m" "$FX/AudioEffectsSettings.m" "$FX/AudioEffectsFiles.m" "$FX/AudioEffectsPresets.m" "$FX/AutoEq.m" "$FX"/SGDSPEngine.m "$FX"/SGDSPFilters.m \
     "$FX"/SGDSPConvolver.m "$FX"/SGDSPTone.m "$FX"/SGDSPDynamics.m "$FX"/SGDSPCrossfeed.m "$FX"/SGDSPReverb.m "$FX"/SGDSPLiveprog.m \
     "$SRC/Core/SGRebind.m" "$SRC/Core/SGLog.m" "$SRC/Core/SGPrefs.m" "$SRC/Core/SGUIMode.m" "$SRC/Core/SGFlagForce.m" "$VENDOR/build/sim/libsgaudio.a" \
-    -framework UIKit -framework AudioToolbox -framework AVFoundation -framework Accelerate -framework Foundation \
+    "$OUT"/*.o -lc++ -framework UIKit -framework AudioToolbox -framework AVFoundation -framework Accelerate -framework Foundation \
     -o "$OUT/AudioEffectsHarness.app/AudioEffectsHarness"
 cat > "$OUT/AudioEffectsHarness.app/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>

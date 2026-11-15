@@ -44,6 +44,23 @@ The redesign is `UIGlassEffect`, which only exists from iOS 26. Below that the R
 turns it on only after a warning that it is untested there, and a launch with it that hangs goes back
 to Spotify's own screens with everything else the mod adds on top. Both live in Settings → Mod Settings.
 
+## Quick Audio EQ
+
+The player's **slider icon** opens the bass boost and ten-band equalizer in one tap. In the redesigned
+player it is beside Lyrics; its **⋯ → Audio EQ** menu is another entry. In the native player it appears
+in free space in the header, without covering Spotify's buttons or title. **Mod Settings → Audio EQ**
+is always available near the top in either look.
+
+Enable the master switch and Bass boost or Equalizer. Bass frequency is adjustable from **30–200 Hz**,
+with gain limited by your own **0–18 dB** ceiling; ten EQ bands run from **31.5 Hz to 16 kHz**, each
+**−12…+12 dB**. Settings save automatically. All effects start off. Hungarian and English labels,
+separate EQ/full resets and live audio diagnostics are included.
+
+Quick EQ is built into the same IPA automatically. It follows the existing Audio Effects chain, whose
+controls remain independent. The DSP and PCM adapter have portable tests; Spotify playback, Bluetooth,
+background audio and the new player buttons still need verification on a real device. AirPlay and
+Spotify Connect are outside its scope. See [Quick EQ development and device checks](docs/quick-eq.md).
+
 ## Build it
 
 No IPA is distributed. Bring a decrypted **Spotify 9.1.78**, **9.1.88** or **9.1.90** IPA; you get an unsigned
