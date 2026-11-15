@@ -27,7 +27,8 @@ void SGShapeGlass(UIView *glass, CGFloat radius, BOOL capsule);
 
 // Dark whatever the system is set to, for a controller the mod presents. A sheet's glass is its presentation's,
 // which the controller's own override does not reach. Call it after modalPresentationStyle is set.
-void SGPresentDark(UIViewController *controller);
+// C linkage for Objective-C++ callers; framework imports stay outside linkage blocks.
+FOUNDATION_EXPORT void SGPresentDark(UIViewController *controller);
 
 // The areas each look keeps transparent are its own: Native/Appearance/Repaint.h and
 // Redesigned/Kit/SGRRepaint.h.

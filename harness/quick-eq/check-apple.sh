@@ -9,17 +9,20 @@ FX="$SRC/Shared/QuickEQ"
 OUT="$HERE/build/apple"
 mkdir -p "$OUT"
 SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+# Theos enables Clang modules in the real tweak build. Check the same import
+# rules here, including Objective-C++ modules, before attempting the full IPA.
+module_flags=(-fmodules "-fmodules-cache-path=$OUT/module-cache")
 for file in AudioDSP.cpp QuickEQAudio.cpp QuickEQSettings.mm; do
     # Bash 3.2 (macOS /bin/bash) treats an empty array as unset with nounset.
     # Keep common flags in the array so the C++-only iterations are nonempty too.
-    compile_flags=(-Wall -Wextra -Werror -Wno-deprecated-declarations -I"$SRC")
+    compile_flags=(-fcxx-modules -Wall -Wextra -Werror -Wno-deprecated-declarations -I"$SRC")
     [[ "$file" == *.mm ]] && compile_flags+=(-fobjc-arc)
     xcrun --sdk iphoneos clang++ -target arm64-apple-ios16.1 -isysroot "$SDK" -std=c++17 \
-        "${compile_flags[@]}" \
+        "${module_flags[@]}" "${compile_flags[@]}" \
         -c "$FX/$file" -o "$OUT/$file.o"
 done
 xcrun --sdk iphoneos clang -target arm64-apple-ios16.1 -isysroot "$SDK" -fobjc-arc -I"$SRC" \
-    -c "$HERE/link-host.m" -o "$OUT/link-host.o"
+    "${module_flags[@]}" -c "$HERE/link-host.m" -o "$OUT/link-host.o"
 xcrun --sdk iphoneos clang++ -target arm64-apple-ios16.1 -isysroot "$SDK" -dynamiclib \
     "$OUT"/*.o -framework UIKit -framework CoreGraphics -framework Foundation -framework AVFoundation -framework AudioToolbox \
     -o "$OUT/QuickEQ-link-check.dylib"
@@ -37,10 +40,10 @@ if [[ -n "${THEOS:-}" ]]; then
         generated="$OUT/$(basename "$source").m"
         "$THEOS/bin/logos.pl" -c generator=internal "$SRC/$source" > "$generated"
         xcrun --sdk iphoneos clang -target arm64-apple-ios16.1 -isysroot "$SDK" -fobjc-arc -fsyntax-only \
-            -Wno-deprecated-declarations -I"$SRC" -I"$(dirname "$SRC/$source")" \
+            "${module_flags[@]}" -Wno-deprecated-declarations -I"$SRC" -I"$(dirname "$SRC/$source")" \
             -I"$THEOS/include" -I"$THEOS/vendor/include" '-DSG_VERSION="0.0.0-check"' "$generated"
     done
     xcrun --sdk iphoneos clang -target arm64-apple-ios16.1 -isysroot "$SDK" -fobjc-arc -fsyntax-only \
-        -Wno-deprecated-declarations -I"$SRC" "$SRC/Redesigned/Player/PlayerMenu.m"
+        "${module_flags[@]}" -Wno-deprecated-declarations -I"$SRC" "$SRC/Redesigned/Player/PlayerMenu.m"
     echo "PASS: Apple SDK syntax checks for real EQ hooks, player menu and Mod Settings"
 fi

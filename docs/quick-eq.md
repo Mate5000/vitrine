@@ -71,8 +71,10 @@ bash harness/audio-effects/build-sim.sh
 bash harness/lossless/handoff-build.sh
 ```
 
-`check-apple.sh` compiles all production Quick EQ sources for arm64 and links with stand-ins for SGPage
-and SGPresentDark, checking C/Objective-C++ linkage. With `THEOS` set, it also preprocesses and syntax-checks
+`check-apple.sh` compiles all production Quick EQ sources for arm64 with Clang modules enabled as in Theos,
+and links with stand-ins for SGPage and SGPresentDark, checking C/Objective-C++ linkage. Framework imports
+stay outside `extern "C"`; the shared `SGPresentDark` declaration uses `FOUNDATION_EXPORT` for C linkage.
+With `THEOS` set, it also preprocesses and syntax-checks
 the real native/player/settings/audio hooks and player menu. The existing audio integration harness links
 the real Quick EQ adapter with a default-off mailbox. Its player, system-menu and Mod Settings UI
 harnesses use explicit Quick EQ stubs. None of those stand-ins ship in the tweak.

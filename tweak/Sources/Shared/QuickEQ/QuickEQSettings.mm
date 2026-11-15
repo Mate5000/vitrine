@@ -1,10 +1,7 @@
 #import "QuickEQ.h"
 #import "QuickEQInternal.hpp"
-// These APIs are implemented in Objective-C (.m), with C linkage.
-extern "C" {
 #import "Settings/SGPage.h"
 #import "Core/SGGlass.h"
-}
 #import <AVFoundation/AVFoundation.h>
 
 static NSUserDefaults *preferences;
