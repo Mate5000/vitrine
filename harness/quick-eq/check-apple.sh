@@ -25,6 +25,11 @@ xcrun --sdk iphoneos clang++ -target arm64-apple-ios16.1 -isysroot "$SDK" -dynam
     -o "$OUT/QuickEQ-link-check.dylib"
 echo "PASS: iOS arm64 Quick EQ compilation and ObjC/C++ linkage (UI host stand-ins)"
 
+# Exercise the player's class-local hook against Apple's real runtime on the host.
+xcrun --sdk macosx clang -Wall -Wextra -Werror -I"$SRC" \
+    "$HERE/player-method-hook.c" -lobjc -o "$OUT/player-method-hook"
+"$OUT/player-method-hook"
+
 # Compile the real Logos/UI entry points too: the link host above cannot catch
 # a misspelled native hook or a type error in a player/menu/settings integration.
 if [[ -n "${THEOS:-}" ]]; then

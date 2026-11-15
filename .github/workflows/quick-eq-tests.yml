@@ -3,9 +3,9 @@ name: Quick EQ checks
 on:
   workflow_dispatch:
   push:
-    paths: ['tweak/Makefile', 'tweak/Resources/SGQuickEQ.bundle/**', 'tweak/Sources/Shared/QuickEQ/**', 'tweak/Sources/Shared/AudioEffects/AudioEffects.x', 'tweak/Sources/Native/Player/QuickEQ.x', 'tweak/Sources/Redesigned/Player/PlayerFooter.x', 'tweak/Sources/Redesigned/Player/PlayerMenu.m', 'tweak/Sources/App/ModSettings.x', 'harness/quick-eq/**', 'scripts/verify-quick-eq.py', '.github/workflows/quick-eq-tests.yml']
+    paths: ['tweak/Makefile', 'tweak/Resources/SGQuickEQ.bundle/**', 'tweak/Sources/Shared/QuickEQ/**', 'tweak/Sources/Shared/AudioEffects/AudioEffects.x', 'tweak/Sources/Native/Player/QuickEQ.x', 'tweak/Sources/Redesigned/Player/PlayerFooter.x', 'tweak/Sources/Redesigned/Player/PlayerMethodHook.h', 'tweak/Sources/Redesigned/Player/PlayerMenu.m', 'tweak/Sources/App/ModSettings.x', 'harness/quick-eq/**', 'scripts/verify-quick-eq.py', '.github/workflows/quick-eq-tests.yml']
   pull_request:
-    paths: ['tweak/Makefile', 'tweak/Resources/SGQuickEQ.bundle/**', 'tweak/Sources/Shared/QuickEQ/**', 'tweak/Sources/Shared/AudioEffects/AudioEffects.x', 'tweak/Sources/Native/Player/QuickEQ.x', 'tweak/Sources/Redesigned/Player/PlayerFooter.x', 'tweak/Sources/Redesigned/Player/PlayerMenu.m', 'tweak/Sources/App/ModSettings.x', 'harness/quick-eq/**', 'scripts/verify-quick-eq.py', '.github/workflows/quick-eq-tests.yml']
+    paths: ['tweak/Makefile', 'tweak/Resources/SGQuickEQ.bundle/**', 'tweak/Sources/Shared/QuickEQ/**', 'tweak/Sources/Shared/AudioEffects/AudioEffects.x', 'tweak/Sources/Native/Player/QuickEQ.x', 'tweak/Sources/Redesigned/Player/PlayerFooter.x', 'tweak/Sources/Redesigned/Player/PlayerMethodHook.h', 'tweak/Sources/Redesigned/Player/PlayerMenu.m', 'tweak/Sources/App/ModSettings.x', 'harness/quick-eq/**', 'scripts/verify-quick-eq.py', '.github/workflows/quick-eq-tests.yml']
 
 permissions:
   contents: read
