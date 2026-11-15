@@ -21,7 +21,7 @@ done
 xcrun --sdk iphoneos clang -target arm64-apple-ios16.1 -isysroot "$SDK" -fobjc-arc -I"$SRC" \
     -c "$HERE/link-host.m" -o "$OUT/link-host.o"
 xcrun --sdk iphoneos clang++ -target arm64-apple-ios16.1 -isysroot "$SDK" -dynamiclib \
-    "$OUT"/*.o -framework UIKit -framework Foundation -framework AVFoundation -framework AudioToolbox \
+    "$OUT"/*.o -framework UIKit -framework CoreGraphics -framework Foundation -framework AVFoundation -framework AudioToolbox \
     -o "$OUT/QuickEQ-link-check.dylib"
 echo "PASS: iOS arm64 Quick EQ compilation and ObjC/C++ linkage (UI host stand-ins)"
 
