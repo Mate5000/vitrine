@@ -77,7 +77,8 @@ the real native/player/settings/audio hooks and player menu. The existing audio 
 the real Quick EQ adapter with a default-off mailbox. Its player, system-menu and Mod Settings UI
 harnesses use explicit Quick EQ stubs. None of those stand-ins ship in the tweak.
 
-The Apple check also runs `player-method-hook.c` on the Mac host against Apple's Objective-C runtime:
+The Apple check also runs `player-method-hook.m` on the Mac host against Apple's Objective-C runtime,
+using an NSObject-based class hierarchy so class initialization matches the real views:
 the player's Connect hit-area hook must preserve superclass/sibling methods and return the original
 implementation without requiring Cydia Substrate.
 

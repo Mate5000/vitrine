@@ -26,8 +26,8 @@ xcrun --sdk iphoneos clang++ -target arm64-apple-ios16.1 -isysroot "$SDK" -dynam
 echo "PASS: iOS arm64 Quick EQ compilation and ObjC/C++ linkage (UI host stand-ins)"
 
 # Exercise the player's class-local hook against Apple's real runtime on the host.
-xcrun --sdk macosx clang -Wall -Wextra -Werror -I"$SRC" \
-    "$HERE/player-method-hook.c" -lobjc -o "$OUT/player-method-hook"
+xcrun --sdk macosx clang -Wall -Wextra -Werror -fobjc-arc -I"$SRC" \
+    "$HERE/player-method-hook.m" -framework Foundation -lobjc -o "$OUT/player-method-hook"
 "$OUT/player-method-hook"
 
 # Compile the real Logos/UI entry points too: the link host above cannot catch

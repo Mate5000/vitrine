@@ -1,3 +1,4 @@
+#import <Foundation/Foundation.h>
 #include "Redesigned/Player/PlayerMethodHook.h"
 #include <assert.h>
 #include <stdio.h>
@@ -7,15 +8,18 @@ static id replacement(id receiver, SEL selector, ...) { (void)selector; return r
 static id childReplacement(id receiver, SEL selector, ...) { (void)selector; return receiver; }
 
 static Class newClass(Class parent, const char *name) {
+    assert(parent);
     Class cls = objc_allocateClassPair(parent, name, 0);
     assert(cls);
     objc_registerClassPair(cls);
     return cls;
 }
 
-int main(void) {
+static void runTests(void) {
     SEL selector = sel_registerName("testMethod");
-    Class parent = newClass(Nil, "SGHookTestParent");
+    // Apple's method lookup sends +initialize. Inherit NSObject's implementation,
+    // just as the real UIView subclasses do, instead of creating a bare root class.
+    Class parent = newClass([NSObject class], "SGHookTestParent");
     assert(class_addMethod(parent, selector, (IMP)original, "@@:"));
     Class child = newClass(parent, "SGHookTestChild");
     Class sibling = newClass(parent, "SGHookTestSibling");
@@ -46,5 +50,11 @@ int main(void) {
     assert(!SGRPlayerHookMethod(child, (SEL)0, (IMP)replacement));
     assert(!SGRPlayerHookMethod(child, selector, (IMP)0));
     puts("PASS: player hook preserves inherited/class-local methods without Substrate");
+}
+
+int main(void) {
+    @autoreleasepool {
+        runTests();
+    }
     return 0;
 }
